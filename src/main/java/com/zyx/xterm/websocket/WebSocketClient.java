@@ -8,8 +8,10 @@ import org.springframework.web.socket.TextMessage;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -64,31 +66,17 @@ public class WebSocketClient {
 
     public void exeCmd(String commandStr) {
         try {
-            //执行命令
-            Process p = Runtime.getRuntime().exec(commandStr);
-            //获取输出流
-            InputStream in = p.getInputStream();
-            try {
-                //定义一个缓存
-                //一个UDP 的用户数据报的数据字段长度为8192字节
-                byte [] buff = new byte[8192];
-                int len =0;
-                StringBuffer sb = new StringBuffer();
-                while((len = in.read(buff)) > 0) {
-                    //设定从0 开始
-                    sb.setLength(0);
-                    //读取数组里面的数据，进行补码
-                    for (int i = 0; i < len; i++){
-                        //进行补码操作
-                        char c = (char) (buff[i] & 0xff);
-                        sb.append(c);
-                    }
-                    //写数据到服务器端
-                    sendMessage(new String(sb.toString().getBytes("ISO-8859-1"),"UTF-8"));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            String[] commands = {commandStr};
+            ProcessBuilder pb = new ProcessBuilder(commands);
+            pb.redirectErrorStream(true);
+            Process p = pb.start();
+            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while ((line = br.readLine()) != null){
+                sendMessage(line);
             }
+            p.waitFor();
+            sendMessage("\r\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
