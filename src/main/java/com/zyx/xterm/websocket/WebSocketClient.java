@@ -35,6 +35,7 @@ public class WebSocketClient {
         webSocketSet.add(this);
         Properties prop = System.getProperties();
         sendMessage("欢迎" + prop.get("user.name") + "登录" + prop.get("os.name"));
+        sendMessage("\r\n");
         LOGGER.info("Open a websocket.");
     }
 
