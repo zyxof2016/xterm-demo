@@ -10,6 +10,7 @@ import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @ServerEndpoint("/webshell/local")
@@ -30,6 +31,8 @@ public class WebSocketClient {
     public void onOpen(Session session) throws Exception {
         this.session = session;
         webSocketSet.add(this);
+        Properties prop = System.getProperties();
+        sendMessage("欢迎" + prop.get("user.name") + "登录" + prop.get("os.name"));
         LOGGER.info("Open a websocket.");
     }
 
